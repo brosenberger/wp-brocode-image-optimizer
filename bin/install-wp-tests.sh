@@ -75,6 +75,18 @@ install_test_suite() {
     _sedi "s|localhost|${DB_HOST}|"                            "$WP_TESTS_DIR/wp-tests-config.php"
 }
 
+wait_for_mysql() {
+    local retries=30
+    until mysql -u"$DB_USER" -p"$DB_PASS" -h"$DB_HOST" -e "SELECT 1" >/dev/null 2>&1; do
+        retries=$((retries - 1))
+        if [ "$retries" -le 0 ]; then
+            printf 'Error: MySQL not available after 30 attempts.\n' >&2
+            exit 1
+        fi
+        sleep 2
+    done
+}
+
 create_db() {
     mysql -u"$DB_USER" -p"$DB_PASS" -h"$DB_HOST" \
         -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
@@ -83,4 +95,5 @@ create_db() {
 resolve_wp_version
 install_wp
 install_test_suite
+wait_for_mysql
 create_db
