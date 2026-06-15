@@ -6,8 +6,6 @@ parameters:
         - vendor
         - tests
         - node_modules(?)
-    ignoreErrors:
-        # WP_CLI and WP_CLI_Command have no PHPStan stubs in phpstan-wordpress;
-        # usage is already guarded by class_exists() at runtime.
-        - '#on an unknown class WP_CLI#'
-        - '#extends unknown class WP_CLI_Command#'
+    stubFiles:
+        # WP_CLI has no official PHPStan stubs; usage is guarded by class_exists() at runtime.
+        - phpstan-stubs.php
