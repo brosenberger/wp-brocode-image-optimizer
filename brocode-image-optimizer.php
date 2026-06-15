@@ -180,6 +180,7 @@ function registerAdminPage(): void
 function renderAdminPage(): void
 {
     $settings = getSettings();
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only count param from our own redirect, not form input
     $scanned = isset($_GET['scanned']) ? (int) $_GET['scanned'] : null;
     ?>
     <div class="wrap">
@@ -225,8 +226,8 @@ function renderAdminPage(): void
 
         <h2><?php esc_html_e('Run a scan', 'brocode-image-optimizer'); ?></h2>
         <p><?php printf(
-            /* translators: 1: WP-CLI command, 2: WP-CLI list flag */
             wp_kses(
+                /* translators: 1: WP-CLI command, 2: WP-CLI list flag */
                 __('An hourly cron job converts new images automatically. Trigger one immediately below, or run %1$s from the CLI (%2$s counts pending without writing).', 'brocode-image-optimizer'),
                 ['code' => []]
             ),
