@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // PHPStan-only stubs for WP_CLI. This file is never loaded at runtime;
-// it is referenced exclusively via phpstan.neon.dist stubFiles.
+// it is referenced exclusively via phpstan.neon.dist bootstrapFiles.
 
 class WP_CLI
 {
