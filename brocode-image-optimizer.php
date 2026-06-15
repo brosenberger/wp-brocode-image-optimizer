@@ -336,16 +336,17 @@ function handleRestScan(WP_REST_Request $request): WP_REST_Response
     return new WP_REST_Response($result, 200);
 }
 
-/**
- * Walk the uploads directory and create any missing WebP/AVIF sidecars.
- *
- * @return array{converted:int,pending:int}
- */
+/** Cron callback — void wrapper so add_action return type satisfies PHPStan. */
 function runScanCron(): void
 {
     runScan();
 }
 
+/**
+ * Walk the uploads directory and create any missing WebP/AVIF sidecars.
+ *
+ * @return array{converted:int,pending:int}
+ */
 function runScan(bool $listOnly = false): array
 {
     $settings = getSettings();
