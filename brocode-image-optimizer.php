@@ -68,7 +68,7 @@ add_action('admin_menu', __NAMESPACE__ . '\\registerAdminPage');
 add_action('admin_post_' . CRON_HOOK, __NAMESPACE__ . '\\handleScanNow');
 add_action('init', __NAMESPACE__ . '\\loadTextdomain');
 add_action('init', __NAMESPACE__ . '\\ensureScheduled');
-add_action(CRON_HOOK, __NAMESPACE__ . '\\runScan');
+add_action(CRON_HOOK, __NAMESPACE__ . '\\runScanCron');
 add_action('init', __NAMESPACE__ . '\\registerCliCommand');
 add_action('rest_api_init', __NAMESPACE__ . '\\registerRestRoutes');
 
@@ -341,6 +341,11 @@ function handleRestScan(WP_REST_Request $request): WP_REST_Response
  *
  * @return array{converted:int,pending:int}
  */
+function runScanCron(): void
+{
+    runScan();
+}
+
 function runScan(bool $listOnly = false): array
 {
     $settings = getSettings();
