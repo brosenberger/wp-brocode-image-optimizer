@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ruleset name="BroCode Image Optimizer">
+    <description>WPCS security, i18n, and compatibility checks for BroCode Image Optimizer.</description>
+
+    <file>.</file>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg value="sp"/>
+
+    <rule ref="WordPress"/>
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array" value="brocode-image-optimizer"/>
+        </properties>
+    </rule>
+
+    <config name="minimum_wp_version" value="5.8"/>
+    <config name="testVersion" value="7.4-"/>
+</ruleset>

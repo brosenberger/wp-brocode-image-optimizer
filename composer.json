@@ -1,0 +1,43 @@
+{
+    "name": "brocode/image-optimizer",
+    "description": "Cron-driven WebP & AVIF sidecar generation for WordPress.",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Benjamin Rosenberger",
+            "email": "bensch.rosenberger@gmail.com",
+            "homepage": "https://brocode.at"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.11",
+        "wp-coding-standards/wpcs": "^3.1",
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "szepeviktor/phpstan-wordpress": "^2.0",
+        "phpstan/extension-installer": "^1.4",
+        "php-stubs/wordpress-stubs": "^6.6",
+        "phpunit/phpunit": "^9.6",
+        "yoast/phpunit-polyfills": "^1.1",
+        "brain/monkey": "^2.6"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "scripts": {
+        "lint": "phpcs --standard=phpcs.xml.dist",
+        "fix": "phpcbf --standard=phpcs.xml.dist",
+        "analyse": "phpstan analyse --memory-limit=512M",
+        "test:unit": "phpunit --bootstrap tests/bootstrap.php --testsuite unit",
+        "test:integration": "phpunit --testsuite integration"
+    }
+}

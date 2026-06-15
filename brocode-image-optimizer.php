@@ -26,14 +26,24 @@
  * @link https://brocode.at
  */
 /**
- * Plugin Name: BroCode Image Optimizer
- * Description: Cron-driven WebP & AVIF sidecar generation. Serving is handled at the web-server layer via Accept content negotiation — no PHP in the image path.
- * Version: 2.0.0
+ * Plugin Name:       BroCode Image Optimizer
+ * Plugin URI:        https://brocode.at/plugins/brocode-image-optimizer/
+ * Description:       Cron-driven WebP & AVIF sidecar generation. Serving is handled at the web-server layer via Accept content negotiation — no PHP in the image path.
+ * Version:           2.0.0
  * Requires at least: 5.8
- * Requires PHP: 7.4
+ * Requires PHP:      7.4
+ * Author:            Benjamin Rosenberger
+ * Author URI:        https://brocode.at
+ * License:           MIT
+ * License URI:       https://opensource.org/licenses/MIT
+ * Text Domain:       brocode-image-optimizer
  */
 
 declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 namespace Brocode\ImageOptimizer;
 
@@ -56,6 +66,7 @@ const SCAN_BATCH_LIMIT = 200;
 add_action('admin_init', __NAMESPACE__ . '\\registerSettings');
 add_action('admin_menu', __NAMESPACE__ . '\\registerAdminPage');
 add_action('admin_post_' . CRON_HOOK, __NAMESPACE__ . '\\handleScanNow');
+add_action('init', __NAMESPACE__ . '\\loadTextdomain');
 add_action('init', __NAMESPACE__ . '\\ensureScheduled');
 add_action(CRON_HOOK, __NAMESPACE__ . '\\runScan');
 add_action('init', __NAMESPACE__ . '\\registerCliCommand');
@@ -146,6 +157,15 @@ function deactivate(): void
     }
 }
 
+function loadTextdomain(): void
+{
+    load_plugin_textdomain(
+        'brocode-image-optimizer',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+}
+
 function registerAdminPage(): void
 {
     add_options_page(
@@ -163,35 +183,39 @@ function renderAdminPage(): void
     $scanned = isset($_GET['scanned']) ? (int) $_GET['scanned'] : null;
     ?>
     <div class="wrap">
-        <h1>BroCode Image Optimizer</h1>
+        <h1><?php esc_html_e('BroCode Image Optimizer', 'brocode-image-optimizer'); ?></h1>
         <?php if ($scanned !== null) : ?>
-            <div class="notice notice-success is-dismissible"><p><?php echo esc_html(sprintf('Scan complete — generated %d sidecar(s).', $scanned)); ?></p></div>
+            <div class="notice notice-success is-dismissible"><p><?php echo esc_html(sprintf(
+                /* translators: %d: number of sidecar files generated */
+                __('Scan complete — generated %d sidecar(s).', 'brocode-image-optimizer'),
+                $scanned
+            )); ?></p></div>
         <?php endif; ?>
         <form method="post" action="options.php">
             <?php settings_fields('brocode_image_optimizer'); ?>
             <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row">Generate WebP</th>
+                    <th scope="row"><?php esc_html_e('Generate WebP', 'brocode-image-optimizer'); ?></th>
                     <td><input type="checkbox" name="<?php echo esc_attr(OPTION_KEY); ?>[enable_webp]" value="1" <?php checked((int) $settings['enable_webp'], 1); ?>></td>
                 </tr>
                 <?php if (avifSupported()) : ?>
                 <tr>
-                    <th scope="row">Generate AVIF</th>
+                    <th scope="row"><?php esc_html_e('Generate AVIF', 'brocode-image-optimizer'); ?></th>
                     <td><input type="checkbox" name="<?php echo esc_attr(OPTION_KEY); ?>[enable_avif]" value="1" <?php checked((int) $settings['enable_avif'], 1); ?>></td>
                 </tr>
                 <?php else : ?>
                 <tr>
-                    <th scope="row">Generate AVIF</th>
-                    <td><em>Not available — this server's image library was not built with AVIF support.</em></td>
+                    <th scope="row"><?php esc_html_e('Generate AVIF', 'brocode-image-optimizer'); ?></th>
+                    <td><em><?php esc_html_e("Not available — this server's image library was not built with AVIF support.", 'brocode-image-optimizer'); ?></em></td>
                 </tr>
                 <?php endif; ?>
                 <tr>
-                    <th scope="row">WebP Quality</th>
+                    <th scope="row"><?php esc_html_e('WebP Quality', 'brocode-image-optimizer'); ?></th>
                     <td><input type="number" name="<?php echo esc_attr(OPTION_KEY); ?>[webp_quality]" value="<?php echo esc_attr((string) $settings['webp_quality']); ?>" min="10" max="100"></td>
                 </tr>
                 <?php if (avifSupported()) : ?>
                 <tr>
-                    <th scope="row">AVIF Quality</th>
+                    <th scope="row"><?php esc_html_e('AVIF Quality', 'brocode-image-optimizer'); ?></th>
                     <td><input type="number" name="<?php echo esc_attr(OPTION_KEY); ?>[avif_quality]" value="<?php echo esc_attr((string) $settings['avif_quality']); ?>" min="10" max="100"></td>
                 </tr>
                 <?php endif; ?>
@@ -199,21 +223,60 @@ function renderAdminPage(): void
             <?php submit_button(); ?>
         </form>
 
-        <h2>Run a scan</h2>
-        <p>An hourly cron job converts new images automatically. Trigger one immediately below, or run <code>ddev wp brocode-image scan</code> from the CLI (<code>--list</code> counts pending without writing).</p>
+        <h2><?php esc_html_e('Run a scan', 'brocode-image-optimizer'); ?></h2>
+        <p><?php printf(
+            /* translators: 1: WP-CLI command, 2: WP-CLI list flag */
+            wp_kses(
+                __('An hourly cron job converts new images automatically. Trigger one immediately below, or run %1$s from the CLI (%2$s counts pending without writing).', 'brocode-image-optimizer'),
+                ['code' => []]
+            ),
+            '<code>ddev wp brocode-image scan</code>',
+            '<code>--list</code>'
+        ); ?></p>
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
             <input type="hidden" name="action" value="<?php echo esc_attr(CRON_HOOK); ?>">
             <?php wp_nonce_field(CRON_HOOK); ?>
-            <?php submit_button('Scan now', 'secondary'); ?>
+            <?php submit_button(__('Scan now', 'brocode-image-optimizer'), 'secondary'); ?>
         </form>
 
-        <h2>Web-server configuration (required)</h2>
-        <p>Conversion writes <code>photo.jpg.webp</code><?php echo avifSupported() ? ' / <code>photo.jpg.avif</code>' : ''; ?> sidecars next to each original. Delivery happens entirely in the web server — it inspects the browser's <code>Accept</code> header and serves the best sidecar that exists, with no PHP in the path and no template changes. This plugin <strong>documents but cannot install</strong> these rules; add the snippet for your server. Until it is in place, browsers receive the original files.</p>
+        <h2><?php esc_html_e('Web-server configuration (required)', 'brocode-image-optimizer'); ?></h2>
+        <p><?php
+            $webpSidecar = '<code>' . esc_html('photo.jpg.webp') . '</code>';
+            $avifSidecar = avifSupported() ? ' / <code>' . esc_html('photo.jpg.avif') . '</code>' : '';
+            printf(
+                /* translators: 1: WebP sidecar example, 2: optional AVIF sidecar example, 3: Accept HTTP header name, 4: bold disclaimer phrase */
+                wp_kses(
+                    __('Conversion writes %1$s%2$s sidecars next to each original. Delivery happens entirely in the web server — it inspects the browser\'s %3$s header and serves the best sidecar that exists, with no PHP in the path and no template changes. This plugin %4$s these rules; add the snippet for your server. Until it is in place, browsers receive the original files.', 'brocode-image-optimizer'),
+                    ['code' => [], 'strong' => []]
+                ),
+                $webpSidecar,
+                $avifSidecar,
+                '<code>Accept</code>',
+                '<strong>' . esc_html__('documents but cannot install', 'brocode-image-optimizer') . '</strong>'
+            );
+        ?></p>
 
-        <h3>nginx (<code>map</code> in the <code>http</code> block, <code>location</code> in the <code>server</code> block)</h3>
+        <h3><?php printf(
+            /* translators: 1: map directive, 2: http block, 3: location directive, 4: server block — keep code tags as-is */
+            wp_kses(
+                __('nginx (%1$s in the %2$s block, %3$s in the %4$s block)', 'brocode-image-optimizer'),
+                ['code' => []]
+            ),
+            '<code>map</code>',
+            '<code>http</code>',
+            '<code>location</code>',
+            '<code>server</code>'
+        ); ?></h3>
         <pre><code><?php echo esc_html(nginxSnippet()); ?></code></pre>
 
-        <h3>Apache (<code>.htaccess</code> in the uploads directory, or the site root)</h3>
+        <h3><?php printf(
+            /* translators: 1: .htaccess filename */
+            wp_kses(
+                __('Apache (%1$s in the uploads directory, or the site root)', 'brocode-image-optimizer'),
+                ['code' => []]
+            ),
+            '<code>.htaccess</code>'
+        ); ?></h3>
         <pre><code><?php echo esc_html(apacheSnippet()); ?></code></pre>
     </div>
     <?php
@@ -222,7 +285,7 @@ function renderAdminPage(): void
 function handleScanNow(): void
 {
     if (!current_user_can('manage_options')) {
-        wp_die('Insufficient permissions.');
+        wp_die(esc_html__('Insufficient permissions.', 'brocode-image-optimizer'));
     }
     check_admin_referer(CRON_HOOK);
 
@@ -462,12 +525,20 @@ function registerCliCommand(): void
             $result = runScan($listOnly);
 
             if ($listOnly) {
-                WP_CLI::success(sprintf('%d sidecar(s) pending conversion.', $result['pending']));
+                WP_CLI::success(sprintf(
+                    /* translators: %d: number of pending sidecars */
+                    __('%d sidecar(s) pending conversion.', 'brocode-image-optimizer'),
+                    $result['pending']
+                ));
 
                 return;
             }
 
-            WP_CLI::success(sprintf('Generated %d sidecar(s).', $result['converted']));
+            WP_CLI::success(sprintf(
+                /* translators: %d: number of generated sidecars */
+                __('Generated %d sidecar(s).', 'brocode-image-optimizer'),
+                $result['converted']
+            ));
         }
     });
 }
