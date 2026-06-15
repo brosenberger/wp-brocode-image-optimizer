@@ -94,8 +94,9 @@ final class DefaultSettingsTest extends TestCase
         $source = tempnam(sys_get_temp_dir(), 'brio_src_');
         $sidecar = $source . '.webp';
         file_put_contents($sidecar, '');
-        // Force source mtime one second ahead of the sidecar.
-        touch($sidecar, filemtime($source) - 1);
+        // Pin sidecar to a fixed point in the past, well before any live source mtime.
+        touch($sidecar, 1000000000);
+        clearstatcache(true, $sidecar);
 
         $this->assertTrue(needsSidecar($source, $sidecar));
 
