@@ -23,6 +23,7 @@
  * @copyright 2026 Benjamin Rosenberger
  * @author bensch.rosenberger@gmail.com
  * @license MIT
+ * @link https://brocode.at
  */
 /**
  * Plugin Name: BroCode Image Optimizer
