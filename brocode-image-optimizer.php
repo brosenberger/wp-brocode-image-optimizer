@@ -74,6 +74,7 @@ add_action('rest_api_init', __NAMESPACE__ . '\\registerRestRoutes');
 
 register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\deactivate');
 
+/** @return array<string, mixed> */
 function defaultSettings(): array
 {
     return [
@@ -84,6 +85,7 @@ function defaultSettings(): array
     ];
 }
 
+/** @return array<string, mixed> */
 function getSettings(): array
 {
     $settings = get_option(OPTION_KEY, []);
@@ -438,7 +440,7 @@ function createSidecar(string $sourcePath, string $format, int $quality): bool
         // separate setter. Passing the legacy array form fatals in WP's editor.
         $editor->set_quality($quality);
         $saved = $editor->save(sidecarPath($sourcePath, $format), $mimeType);
-        if (is_wp_error($saved) || !isset($saved['path'])) {
+        if (is_wp_error($saved)) {
             return false;
         }
 
@@ -519,6 +521,10 @@ function registerCliCommand(): void
          *
          *     wp brocode-image scan
          *     wp brocode-image scan --list
+         */
+        /**
+         * @param array<int, string>    $args
+         * @param array<string, mixed>  $assocArgs
          */
         public function scan(array $args, array $assocArgs): void
         {
