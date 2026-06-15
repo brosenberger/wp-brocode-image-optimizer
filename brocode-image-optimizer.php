@@ -244,19 +244,17 @@ function renderAdminPage(): void
         <p><?php
             $webpSidecar = '<code>' . esc_html('photo.jpg.webp') . '</code>';
             $avifSidecar = avifSupported() ? ' / <code>' . esc_html('photo.jpg.avif') . '</code>' : '';
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- vars are built with esc_html(); HTML tags are intentional
-            printf(
-                wp_kses(
+            echo wp_kses(
+                sprintf(
                     /* translators: 1: WebP sidecar example, 2: optional AVIF sidecar example, 3: Accept HTTP header name, 4: bold disclaimer phrase */
                     __('Conversion writes %1$s%2$s sidecars next to each original. Delivery happens entirely in the web server — it inspects the browser\'s %3$s header and serves the best sidecar that exists, with no PHP in the path and no template changes. This plugin %4$s these rules; add the snippet for your server. Until it is in place, browsers receive the original files.', 'brocode-image-optimizer'),
-                    ['code' => [], 'strong' => []]
+                    $webpSidecar,
+                    $avifSidecar,
+                    '<code>Accept</code>',
+                    '<strong>' . esc_html__('documents but cannot install', 'brocode-image-optimizer') . '</strong>'
                 ),
-                $webpSidecar,
-                $avifSidecar,
-                '<code>Accept</code>',
-                '<strong>' . esc_html__('documents but cannot install', 'brocode-image-optimizer') . '</strong>'
+                ['code' => [], 'strong' => []]
             );
-        // phpcs:ignore Generic.WhiteSpace.ScopeIndent.Incorrect -- closing PHP tag in mixed HTML context
         ?></p>
 
         <h3><?php printf(
