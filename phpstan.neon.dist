@@ -6,6 +6,6 @@ parameters:
         - vendor
         - tests
         - node_modules(?)
-    stubFiles:
-        # WP_CLI has no official PHPStan stubs; usage is guarded by class_exists() at runtime.
+    bootstrapFiles:
+        # WP_CLI has no official PHPStan stubs; class_exists() guards runtime use.
         - phpstan-stubs.php
