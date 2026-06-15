@@ -27,7 +27,7 @@
  */
 /**
  * Plugin Name:       BroCode Image Optimizer
- * Plugin URI:        https://brocode.at/plugins/brocode-image-optimizer/
+ * Plugin URI:        https://github.com/brosenberger/wp-brocode-image-optimizer
  * Description:       Cron-driven WebP & AVIF sidecar generation. Serving is handled at the web-server layer via Accept content negotiation — no PHP in the image path.
  * Version:           2.0.0
  * Requires at least: 5.8
@@ -41,11 +41,11 @@
 
 declare(strict_types=1);
 
+namespace Brocode\ImageOptimizer;
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
-namespace Brocode\ImageOptimizer;
 
 use WP_CLI;
 use WP_CLI_Command;
