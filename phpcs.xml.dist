@@ -38,6 +38,12 @@
         </properties>
     </rule>
 
+    <!-- Scope-indent violations are unreliable in mixed PHP/HTML templates;
+         must be silenced at top level because PSR-12 inherits it via PSR-2 -->
+    <rule ref="Generic.WhiteSpace.ScopeIndent">
+        <severity>0</severity>
+    </rule>
+
     <config name="minimum_wp_version" value="5.8"/>
     <config name="testVersion" value="7.4-"/>
 </ruleset>
