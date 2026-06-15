@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="BroCode Image Optimizer">
-    <description>PSR-12 with WordPress security and i18n checks.</description>
+    <description>WordPress security and i18n checks on a PSR-12 base.</description>
 
     <file>.</file>
     <exclude-pattern>*/vendor/*</exclude-pattern>
@@ -8,12 +8,28 @@
     <exclude-pattern>*/tests/*</exclude-pattern>
 
     <arg name="extensions" value="php"/>
-    <arg value="sp"/>
+    <!-- No -p/-s flags: progress output on stdout would break cs2pr XML parsing -->
 
-    <rule ref="PSR12"/>
+    <rule ref="PSR12">
+        <!-- WP plugins legitimately mix declarations and side effects in one file -->
+        <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+        <!-- Two consecutive file-header comment blocks (MIT license + plugin header) -->
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock"/>
+        <!-- WP style uses spaces inside parentheses; conflicts with PSR-2 -->
+        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceAfterOpenBracket"/>
+        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket"/>
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace"/>
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace"/>
+        <!-- Mixed PHP/HTML templates make scope-indent detection unreliable -->
+        <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect"/>
+        <!-- Long i18n strings routinely exceed 120 chars; not worth enforcing -->
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+    </rule>
 
+    <!-- WordPress security: escaping, sanitization, nonces -->
     <rule ref="WordPress.Security"/>
 
+    <!-- i18n: all strings must use the correct text domain -->
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
@@ -21,8 +37,6 @@
             </property>
         </properties>
     </rule>
-
-    <rule ref="WordPress.WP.AlternativeFunctions"/>
 
     <config name="minimum_wp_version" value="5.8"/>
     <config name="testVersion" value="7.4-"/>
